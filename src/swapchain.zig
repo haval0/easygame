@@ -80,8 +80,9 @@ pub const Swapchain = struct {
         errdefer gc.dev.destroySemaphore(next_image_acquired, null);
 
         const result = try gc.dev.acquireNextImageKHR(handle, std.math.maxInt(u64), next_image_acquired, .null_handle);
-        if (result.result != .success) {
-            return error.ImageAcquireFailed;
+        switch (result.result) {
+            .success, .suboptimal_khr => {},
+            else => return error.ImageAcquireFailed,
         }
 
         std.mem.swap(vk.Semaphore, &swap_images[result.image_index].image_acquired, &next_image_acquired);
