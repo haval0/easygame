@@ -7,15 +7,12 @@ pub fn build(b: *std.Build) void {
 
     const registry = b.dependency("vulkan_headers", .{}).path("registry/vk.xml");
 
-    const exe = b.addExecutable(.{
-        .name = "triangle",
+    const exe_mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .link_libc = true,
         .optimize = optimize,
     });
-    b.installArtifact(exe);
-    exe.linkSystemLibrary("glfw");
 
     const registry_path: std.Build.LazyPath = if (maybe_override_registry) |override_registry|
         .{ .cwd_relative = override_registry }
@@ -26,7 +23,7 @@ pub fn build(b: *std.Build) void {
         .registry = registry_path,
     }).module("vulkan-zig");
 
-    exe.root_module.addImport("vulkan", vulkan);
+    exe_mod.addImport("vulkan", vulkan);
 
     const vert_cmd = b.addSystemCommand(&.{
         "glslc",
@@ -35,7 +32,7 @@ pub fn build(b: *std.Build) void {
     });
     const vert_spv = vert_cmd.addOutputFileArg("vert.spv");
     vert_cmd.addFileArg(b.path("shaders/triangle.vert"));
-    exe.root_module.addAnonymousImport("vertex_shader", .{
+    exe_mod.addAnonymousImport("vertex_shader", .{
         .root_source_file = vert_spv,
     });
 
@@ -46,9 +43,16 @@ pub fn build(b: *std.Build) void {
     });
     const frag_spv = frag_cmd.addOutputFileArg("frag.spv");
     frag_cmd.addFileArg(b.path("shaders/triangle.frag"));
-    exe.root_module.addAnonymousImport("fragment_shader", .{
+    exe_mod.addAnonymousImport("fragment_shader", .{
         .root_source_file = frag_spv,
     });
+
+    const exe = b.addExecutable(.{
+        .name = "triangle",
+        .root_module = exe_mod,
+    });
+    b.installArtifact(exe);
+    exe.linkSystemLibrary("glfw");
 
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
