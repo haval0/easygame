@@ -11,7 +11,7 @@ pub fn build(b: *std.Build) void {
 
     const triangle_exe = b.addExecutable(.{
         .name = "triangle",
-        .root_source_file = b.path("triangle.zig"),
+        .root_source_file = b.path("main.zig"),
         .target = target,
         .link_libc = true,
         .optimize = optimize,
@@ -55,6 +55,6 @@ pub fn build(b: *std.Build) void {
     const triangle_run_cmd = b.addRunArtifact(triangle_exe);
     triangle_run_cmd.step.dependOn(b.getInstallStep());
 
-    const triangle_run_step = b.step("run-triangle", "Run the triangle example");
+    const triangle_run_step = b.step("run", "Run the triangle example");
     triangle_run_step.dependOn(&triangle_run_cmd.step);
 }
