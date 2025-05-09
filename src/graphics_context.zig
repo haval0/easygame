@@ -55,6 +55,7 @@ pub const GraphicsContext = struct {
         // see https://github.com/glfw/glfw/issues/2335
         try extension_names.append(vk.extensions.khr_portability_enumeration.name);
         try extension_names.append(vk.extensions.khr_get_physical_device_properties_2.name);
+        try extension_names.append(vk.extensions.ext_debug_utils.name);
 
         var glfw_exts_count: u32 = 0;
         const glfw_exts = c.glfwGetRequiredInstanceExtensions(&glfw_exts_count);
@@ -68,6 +69,8 @@ pub const GraphicsContext = struct {
                 .engine_version = @bitCast(vk.makeApiVersion(0, 0, 0, 0)),
                 .api_version = @bitCast(vk.API_VERSION_1_4),
             },
+            .enabled_layer_count = 1,
+            .pp_enabled_layer_names = &[_][*:0]const u8{"VK_LAYER_KHRONOS_validation"},
             .enabled_extension_count = @intCast(extension_names.items.len),
             .pp_enabled_extension_names = extension_names.items.ptr,
             // enumerate_portability_bit_khr to support vulkan in mac os
