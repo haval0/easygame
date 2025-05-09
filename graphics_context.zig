@@ -66,7 +66,7 @@ pub const GraphicsContext = struct {
                 .application_version = @bitCast(vk.makeApiVersion(0, 0, 0, 0)),
                 .p_engine_name = app_name,
                 .engine_version = @bitCast(vk.makeApiVersion(0, 0, 0, 0)),
-                .api_version = @bitCast(vk.API_VERSION_1_2),
+                .api_version = @bitCast(vk.API_VERSION_1_4),
             },
             .enabled_extension_count = @intCast(extension_names.items.len),
             .pp_enabled_extension_names = extension_names.items.ptr,

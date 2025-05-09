@@ -32,7 +32,7 @@ pub fn build(b: *std.Build) void {
 
     const vert_cmd = b.addSystemCommand(&.{
         "glslc",
-        "--target-env=vulkan1.2",
+        "--target-env=vulkan1.4",
         "-o",
     });
     const vert_spv = vert_cmd.addOutputFileArg("vert.spv");
@@ -43,7 +43,7 @@ pub fn build(b: *std.Build) void {
 
     const frag_cmd = b.addSystemCommand(&.{
         "glslc",
-        "--target-env=vulkan1.2",
+        "--target-env=vulkan1.4",
         "-o",
     });
     const frag_spv = frag_cmd.addOutputFileArg("frag.spv");
