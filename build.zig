@@ -7,15 +7,15 @@ pub fn build(b: *std.Build) void {
 
     const registry = b.dependency("vulkan_headers", .{}).path("registry/vk.xml");
 
-    const triangle_exe = b.addExecutable(.{
+    const exe = b.addExecutable(.{
         .name = "triangle",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .link_libc = true,
         .optimize = optimize,
     });
-    b.installArtifact(triangle_exe);
-    triangle_exe.linkSystemLibrary("glfw");
+    b.installArtifact(exe);
+    exe.linkSystemLibrary("glfw");
 
     const registry_path: std.Build.LazyPath = if (maybe_override_registry) |override_registry|
         .{ .cwd_relative = override_registry }
@@ -26,7 +26,7 @@ pub fn build(b: *std.Build) void {
         .registry = registry_path,
     }).module("vulkan-zig");
 
-    triangle_exe.root_module.addImport("vulkan", vulkan);
+    exe.root_module.addImport("vulkan", vulkan);
 
     const vert_cmd = b.addSystemCommand(&.{
         "glslc",
@@ -35,7 +35,7 @@ pub fn build(b: *std.Build) void {
     });
     const vert_spv = vert_cmd.addOutputFileArg("vert.spv");
     vert_cmd.addFileArg(b.path("shaders/triangle.vert"));
-    triangle_exe.root_module.addAnonymousImport("vertex_shader", .{
+    exe.root_module.addAnonymousImport("vertex_shader", .{
         .root_source_file = vert_spv,
     });
 
@@ -46,13 +46,13 @@ pub fn build(b: *std.Build) void {
     });
     const frag_spv = frag_cmd.addOutputFileArg("frag.spv");
     frag_cmd.addFileArg(b.path("shaders/triangle.frag"));
-    triangle_exe.root_module.addAnonymousImport("fragment_shader", .{
+    exe.root_module.addAnonymousImport("fragment_shader", .{
         .root_source_file = frag_spv,
     });
 
-    const triangle_run_cmd = b.addRunArtifact(triangle_exe);
-    triangle_run_cmd.step.dependOn(b.getInstallStep());
+    const run_cmd = b.addRunArtifact(exe);
+    run_cmd.step.dependOn(b.getInstallStep());
 
-    const triangle_run_step = b.step("run", "Run the triangle example");
-    triangle_run_step.dependOn(&triangle_run_cmd.step);
+    const run_step = b.step("run", "Run the app");
+    run_step.dependOn(&run_cmd.step);
 }
