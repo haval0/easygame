@@ -3,9 +3,10 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-    const maybe_override_registry = b.option([]const u8, "override-registry", "Override the path to the Vulkan registry used for the examples");
+    const maybe_vulkan_sdk = std.process.getEnvVarOwned(b.allocator, "VULKAN_SDK") catch null;
+    defer if (maybe_vulkan_sdk) |vulkan_sdk| b.allocator.free(vulkan_sdk);
 
-    const registry = b.dependency("vulkan_headers", .{}).path("registry/vk.xml");
+    const default_registry = "/usr/share/vulkan/registry/vk.xml";
 
     const exe_mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
@@ -14,10 +15,15 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const registry_path: std.Build.LazyPath = if (maybe_override_registry) |override_registry|
-        .{ .cwd_relative = override_registry }
-    else
-        registry;
+    const registry_path: std.Build.LazyPath = .{
+        .cwd_relative = if (maybe_vulkan_sdk) |vulkan_sdk| b.pathJoin(&.{
+            vulkan_sdk,
+            "share",
+            "vulkan",
+            "registry",
+            "vk.xml",
+        }) else default_registry,
+    };
 
     const vulkan = b.dependency("vulkan_zig", .{
         .registry = registry_path,
