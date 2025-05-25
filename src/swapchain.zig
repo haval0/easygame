@@ -105,6 +105,10 @@ pub const Swapchain = struct {
     }
 
     fn deinitExceptSwapchain(self: Swapchain) void {
+        // Wait idle to avoid destroying semaphores that are still in use
+        // TODO: Proper (delayed, performant) swapchain recreation according to sample
+        // https://docs.vulkan.org/samples/latest/samples/api/swapchain_recreation/README.html
+        self.gc.dev.deviceWaitIdle() catch unreachable;
         for (self.swap_images) |si| si.deinit(self.gc);
         self.allocator.free(self.swap_images);
         self.gc.dev.destroySemaphore(self.next_image_acquired, null);
