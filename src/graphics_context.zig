@@ -181,6 +181,7 @@ fn initializeCandidate(instance: Instance, candidate: DeviceCandidate) !vk.Devic
         2;
 
     return try instance.createDevice(candidate.pdev, &.{
+        .p_next = &vk.PhysicalDeviceVulkan13Features{ .dynamic_rendering = vk.TRUE },
         .queue_create_info_count = queue_count,
         .p_queue_create_infos = &qci,
         .enabled_extension_count = required_device_extensions.len,
