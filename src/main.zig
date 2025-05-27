@@ -36,10 +36,25 @@ const Vertex = struct {
     color: [3]f32,
 };
 
-const vertices = [_]Vertex{
-    .{ .pos = .{ 0, -0.5 }, .color = .{ 1, 0, 0 } },
-    .{ .pos = .{ 0.5, 0.5 }, .color = .{ 0, 1, 0 } },
-    .{ .pos = .{ -0.5, 0.5 }, .color = .{ 0, 0, 1 } },
+const mesh = struct {
+    // change to u32 if using too many verts
+    // remember to change in upload ptr as well!
+    const indices = [_]u16{ 0, 1, 2, 2, 3, 0 };
+
+    const vertices = [_]Vertex{
+        .{ .pos = .{ -0.5, -0.5 }, .color = .{ 1, 0, 0 } },
+        .{ .pos = .{ 0.5, -0.5 }, .color = .{ 0, 1, 0 } },
+        .{ .pos = .{ 0.5, 0.5 }, .color = .{ 0, 0, 1 } },
+        .{ .pos = .{ -0.5, 0.5 }, .color = .{ 1, 1, 1 } },
+    };
+
+    const indices_size: vk.DeviceSize = @sizeOf(@TypeOf(indices));
+    const vertices_size: vk.DeviceSize = @sizeOf(@TypeOf(vertices));
+    // size in bytes of the largest vertex input attribute format alignment
+    // VK_FORMAT_R32G32B32_SFLOAT has 4 bytes
+    const max_alignment: vk.DeviceSize = 4;
+    const vertex_offset = (indices_size + max_alignment - 1) & ~(max_alignment - 1);
+    const size = vertex_offset + vertices_size;
 };
 
 pub fn main() !void {
@@ -92,9 +107,10 @@ pub fn main() !void {
     }, null);
     defer gc.dev.destroyCommandPool(pool, null);
 
+    // https://developer.nvidia.com/vulkan-memory-management
     const buffer = try gc.dev.createBuffer(&.{
-        .size = @sizeOf(@TypeOf(vertices)),
-        .usage = .{ .transfer_dst_bit = true, .vertex_buffer_bit = true },
+        .size = mesh.size,
+        .usage = .{ .transfer_dst_bit = true, .index_buffer_bit = true, .vertex_buffer_bit = true },
         .sharing_mode = .exclusive,
     }, null);
     defer gc.dev.destroyBuffer(buffer, null);
@@ -103,7 +119,7 @@ pub fn main() !void {
     defer gc.dev.freeMemory(memory, null);
     try gc.dev.bindBufferMemory(buffer, memory, 0);
 
-    try uploadVertices(&gc, pool, buffer);
+    try uploadMesh(&gc, pool, buffer);
 
     var cmdbufs = try createCommandBuffers(
         &gc,
@@ -158,9 +174,9 @@ pub fn main() !void {
     try gc.dev.deviceWaitIdle();
 }
 
-fn uploadVertices(gc: *const GraphicsContext, pool: vk.CommandPool, buffer: vk.Buffer) !void {
+fn uploadMesh(gc: *const GraphicsContext, pool: vk.CommandPool, buffer: vk.Buffer) !void {
     const staging_buffer = try gc.dev.createBuffer(&.{
-        .size = @sizeOf(@TypeOf(vertices)),
+        .size = mesh.size,
         .usage = .{ .transfer_src_bit = true },
         .sharing_mode = .exclusive,
     }, null);
@@ -174,11 +190,16 @@ fn uploadVertices(gc: *const GraphicsContext, pool: vk.CommandPool, buffer: vk.B
         const data = try gc.dev.mapMemory(staging_memory, 0, vk.WHOLE_SIZE, .{});
         defer gc.dev.unmapMemory(staging_memory);
 
-        const gpu_vertices: [*]Vertex = @ptrCast(@alignCast(data));
-        @memcpy(gpu_vertices, vertices[0..]);
+        const gpu_indices: [*]u16 = @ptrCast(@alignCast(data));
+        @memcpy(gpu_indices, mesh.indices[0..]);
+
+        const gpu_vertices: [*]align(1) Vertex = @ptrCast(@alignCast(
+            @as([*]u8, @ptrCast(data)) + mesh.vertex_offset,
+        ));
+        @memcpy(gpu_vertices, mesh.vertices[0..]);
     }
 
-    try copyBuffer(gc, pool, buffer, staging_buffer, @sizeOf(@TypeOf(vertices)));
+    try copyBuffer(gc, pool, buffer, staging_buffer, mesh.size);
 }
 
 fn copyBuffer(gc: *const GraphicsContext, pool: vk.CommandPool, dst: vk.Buffer, src: vk.Buffer, size: vk.DeviceSize) !void {
@@ -296,9 +317,10 @@ fn createCommandBuffers(
         gc.dev.cmdSetScissor(cmdbuf, 0, 1, @ptrCast(&scissor));
 
         gc.dev.cmdBindPipeline(cmdbuf, .graphics, pipeline);
-        const offset = [_]vk.DeviceSize{0};
+        gc.dev.cmdBindIndexBuffer(cmdbuf, buffer, 0, vk.IndexType.uint16);
+        const offset = [_]vk.DeviceSize{mesh.vertex_offset};
         gc.dev.cmdBindVertexBuffers(cmdbuf, 0, 1, @ptrCast(&buffer), &offset);
-        gc.dev.cmdDraw(cmdbuf, vertices.len, 1, 0, 0);
+        gc.dev.cmdDrawIndexed(cmdbuf, mesh.indices.len, 1, 0, 0, 0);
 
         gc.dev.cmdEndRendering(cmdbuf);
 
