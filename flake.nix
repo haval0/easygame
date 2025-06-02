@@ -7,7 +7,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     shaderc-overlay = {
-      url = "github:DontEatOreo/nixpkgs/update-koboldcpp";
+      url = "github:nixos/nixpkgs?ref=staging";
       flake = false;
     };
   };

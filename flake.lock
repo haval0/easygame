@@ -54,11 +54,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1746904237,
-        "narHash": "sha256-3e+AVBczosP5dCLQmMoMEogM57gmZ2qrVSrmq9aResQ=",
+        "lastModified": 1748693115,
+        "narHash": "sha256-StSrWhklmDuXT93yc3GrTlb0cKSS0agTAxMGjLKAsY8=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "d89fc19e405cb2d55ce7cc114356846a0ee5e956",
+        "rev": "910796cabe436259a29a72e8d3f5e180fc6dfacc",
         "type": "github"
       },
       "original": {
@@ -77,17 +77,18 @@
       }
     },
     "shaderc-overlay": {
+      "flake": false,
       "locked": {
-        "lastModified": 1745946518,
-        "narHash": "sha256-RsqLgDM2ShipjSpFrQVdb601y5liLa1z5GZPy92iI0M=",
-        "owner": "DontEatOreo",
+        "lastModified": 1748866064,
+        "narHash": "sha256-AR7m1ZW8RaCecakOGHjKeiHc8NKEfAvG6Asaq8s9Vfc=",
+        "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "2b71d86852c533cbbe9c225b1388b15476e1fb1b",
+        "rev": "9883ef53d2aa9e6c632afdd04dbeaf143d5b6972",
         "type": "github"
       },
       "original": {
-        "owner": "DontEatOreo",
-        "ref": "update-koboldcpp",
+        "owner": "nixos",
+        "ref": "staging",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -131,11 +132,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1747138405,
-        "narHash": "sha256-nwvnjvimuVq89CHAiynUgGiWVEENf8wwS8L+b4+fGaI=",
+        "lastModified": 1748824600,
+        "narHash": "sha256-GWrLQaKi6+0hFjfxVkfBH8GMUYS8xxfDgrZNnzRG5bQ=",
         "owner": "mitchellh",
         "repo": "zig-overlay",
-        "rev": "cc26596dea8d372454492896e52e9d3ca1eb6a89",
+        "rev": "072837a83f6f3cccefc7c868d764b7d4d1a1fc9f",
         "type": "github"
       },
       "original": {
