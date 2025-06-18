@@ -31,6 +31,20 @@ pub fn build(b: *std.Build) void {
 
     exe_mod.addImport("vulkan", vulkan);
 
+    const zalgebra = b.dependency("zalgebra", .{}).module("zalgebra");
+
+    exe_mod.addImport("zalgebra", zalgebra);
+
+    const cgltf = b.dependency("cgltf", .{});
+
+    exe_mod.addIncludePath(cgltf.path("."));
+
+    exe_mod.addCSourceFile(.{
+        .file = cgltf.path("cgltf.h"),
+        .language = .c,
+        .flags = &.{"-DCGLTF_IMPLEMENTATION"},
+    });
+
     const vert_cmd = b.addSystemCommand(&.{
         "glslc",
         "--target-env=vulkan1.4",

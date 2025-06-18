@@ -1,5 +1,6 @@
 const std = @import("std");
 const vk = @import("vulkan");
+const za = @import("zalgebra");
 const c = @import("c.zig");
 const GraphicsContext = @import("graphics_context.zig").GraphicsContext;
 const Swapchain = @import("swapchain.zig").Swapchain;
@@ -34,6 +35,12 @@ const Vertex = struct {
 
     pos: [2]f32,
     color: [3]f32,
+};
+
+const UniformBufferObject = struct {
+    model: za.Mat4,
+    view: za.Mat4,
+    proj: za.proj,
 };
 
 const mesh = struct {

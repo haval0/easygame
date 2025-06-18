@@ -1,6 +1,7 @@
 const c = @cImport({
     @cDefine("GLFW_INCLUDE_NONE", {});
     @cInclude("GLFW/glfw3.h");
+    @cInclude("cgltf.h");
 });
 
 const vk = @import("vulkan");
@@ -30,3 +31,11 @@ pub const glfwPollEvents = c.glfwPollEvents;
 pub extern fn glfwGetInstanceProcAddress(instance: vk.Instance, procname: [*:0]const u8) vk.PfnVoidFunction;
 pub extern fn glfwGetPhysicalDevicePresentationSupport(instance: vk.Instance, pdev: vk.PhysicalDevice, queuefamily: u32) c_int;
 pub extern fn glfwCreateWindowSurface(instance: vk.Instance, window: *GLFWwindow, allocation_callbacks: ?*const vk.AllocationCallbacks, surface: *vk.SurfaceKHR) vk.Result;
+
+pub const cgltf_options = c.cgltf_options;
+pub const cgltf_data = c.cgltf_data;
+pub const cgltf_result = c.cgltf_result;
+pub const cgltf_result_success = c.cgltf_result_success;
+
+pub const cgltf_parse_file = c.cgltf_parse_file;
+pub const cgltf_free = c.cgltf_free;
